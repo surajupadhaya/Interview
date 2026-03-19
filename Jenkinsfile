@@ -28,6 +28,7 @@ pipeline {
 	      success {
 		 sh 'echo DONE-WRONG'
 
+
 	       }
 
 
@@ -35,6 +36,7 @@ pipeline {
     }
     stage('Runing the basic script '){
       steps {
+        retry(3){
           script { 
                  def returncode = sh( script: 'sh /var/tmp/basic.sh',returnStatus:true)
             
@@ -43,6 +45,7 @@ pipeline {
 		      }
 
                 }
+      }
       }
       post {
              failure {
