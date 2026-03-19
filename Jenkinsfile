@@ -32,7 +32,7 @@ pipeline {
                  def returncode = sh( script: 'sh /var/tmp/basic.sh',returnStatus:true)
             
 	      if ( returncode != 0){
-			 echo "Failure runing  script"
+			 error ( "Failure runing  script" )
 		      }
 
                 }
