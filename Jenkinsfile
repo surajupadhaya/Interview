@@ -50,6 +50,18 @@ pipeline {
       post {
              failure {
                    echo "Script failed to ran"
+                  emailext(
+		      subject: "FAILED: ${JOB_NAME} #${BUILD_NUMBER}",
+		      body: """
+			Build failed.
+			Job: ${JOB_NAME}
+			Build: ${BUILD_NUMBER}
+			Branch: ${GIT_BRANCH}
+			URL: ${BUILD_URL}
+		      """,
+		      to: 'srupadhaya15@gmail.com',
+		      attachLog: true
+		    ) 
                    }
              success {
                    echo "Script ran"
