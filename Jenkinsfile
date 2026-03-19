@@ -4,7 +4,8 @@ pipeline {
 
   stages {
     stage('Stage 1') {
-     steps { sh 'echo $BUILD_NUMBER'}
+     steps { sh 'echo $BUILD_NUMBER'
+             sh 'echo $BRANCH_NAME'}
     }
     stage('Initial branch check and adhoc config'){
     
