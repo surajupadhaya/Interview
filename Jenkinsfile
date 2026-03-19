@@ -3,7 +3,9 @@ pipeline {
   agent any 
 
   stages {
-
+    stage('Stage 1') {
+     sh 'echo $BUILD_NUMBER'
+    }
     stage('Initial branch check and adhoc config'){
     
      when {
@@ -14,19 +16,18 @@ pipeline {
              sh 'echo $BUILD_NUMBER'
              sh 'touch /var/tmp/$BUILD_NUMBER' 
            }
+     post {
+	      failure {
+		 sh 'echo DONE-WRONG'
 
-    post {
-      failure {
-         sh 'echo DONE-WRONG'
+	       }
+	      success {
+		 sh 'echo DONE-WRONG'
 
-       }
-      success {
-         sh 'echo DONE-WRONG'
-
-       }
+	       }
 
 
-    }
+	    }
     }
   } 
  
