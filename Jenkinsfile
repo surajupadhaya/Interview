@@ -15,7 +15,6 @@ pipeline {
              sh 'touch /var/tmp/$BUILD_NUMBER' 
            }
 
-    }
     post {
       failure {
          sh 'echo DONE-WRONG'
@@ -27,6 +26,7 @@ pipeline {
        }
 
 
+    }
     }
   } 
  
