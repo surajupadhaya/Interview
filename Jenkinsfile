@@ -14,6 +14,13 @@ pipeline {
      steps { sh 'echo $BUILD_NUMBER'
              sh 'echo $BRANCH_NAME'}
     }
+    stage('check one variable'){
+      steps{
+        withCredentials([string(credentialsId: 'USR',variable:'Username')]) {
+        sh 'echo $Username is the secret' 
+         }
+    }
+    }
     stage('Initial branch check and adhoc config'){
     
      steps {
