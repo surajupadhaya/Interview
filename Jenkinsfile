@@ -1,8 +1,15 @@
 pipeline {
 
   agent any 
+  
+  
 
   stages {
+    stage('Approval gate'){
+      steps {
+        input( message: 'Build is approved ??' ,ok: 'YES',submitter: 'ops-team',parameters: [ string(name:'REASON',description:'REASON for DEPLOY')])
+        }
+    }
     stage('Stage 1') {
      steps { sh 'echo $BUILD_NUMBER'
              sh 'echo $BRANCH_NAME'}
