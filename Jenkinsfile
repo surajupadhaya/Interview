@@ -26,6 +26,25 @@ pipeline {
 
 	    }
     }
+    stage('Runing the basic script '){
+      steps {
+          script { 
+                 def returncode = sh( script: 'sh /var/tmp/basic.sh',returnStatus:true)
+            }
+          if ( returncode != 0){
+                 echo "Failure runing  script"
+              }
+      }
+      post {
+             failure {
+                   echo "Script failed to ran"
+                   }
+             success {
+                   echo "Script ran"
+                   }
+         }
+
+   }
   } 
  
 
