@@ -9,10 +9,6 @@ pipeline {
     }
     stage('Initial branch check and adhoc config'){
     
-     when {
-       branch 'master'
-
-     }
      steps {
              sh 'echo $BUILD_NUMBER'
              sh 'touch /var/tmp/$BUILD_NUMBER' 
