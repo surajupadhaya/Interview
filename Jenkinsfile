@@ -7,7 +7,7 @@ pipeline {
     stage('Initial branch check and adhoc config'){
     
      when {
-       branch 'mains'
+       branch 'master'
 
      }
      steps {
