@@ -1,0 +1,95 @@
+pipeline {
+  agent any
+  environment {
+    VAULT_PASS = credentials('vault-password-id')
+    TARGET_ENV = "${params.ENVIRONMENT ?: 'dev'}"
+  }
+  parameters {
+    choice(name: 'ENVIRONMENT', choices: ['dev','staging','prod'])
+    string(name: 'LIMIT', defaultValue: '', description: '--limit scope')
+    booleanParam(name: 'DRY_RUN', defaultValue: true)
+  }
+
+  stages {
+    stage('Lint & Syntax') {
+      steps {
+        script { env.FAILED_STAGE = 'Lint' }
+        sh 'yamllint -c .yamllint playbooks/ roles/'
+        sh 'ansible-lint playbooks/site.yml'
+        sh 'ansible-playbook site.yml --syntax-check -i inventory/${TARGET_ENV}/'
+      }
+    }
+
+    stage('Dry Run') {
+      when { expression { params.DRY_RUN } }
+      steps {
+        script { env.FAILED_STAGE = 'Dry Run' }
+        sh """ansible-playbook site.yml \
+          -i inventory/${TARGET_ENV}/ --check --diff \
+          --vault-password-file <(echo $VAULT_PASS) \
+          ${params.LIMIT ? "--limit ${params.LIMIT}" : ''} \
+          | tee dry_run.txt"""
+        archiveArtifacts 'dry_run.txt'
+      }
+    }
+
+    stage('Manual Approval') {
+      when { expression { TARGET_ENV == 'prod' } }
+      steps {
+        input(message: 'Deploy to PRODUCTION?', ok: 'Approve',
+              submitter: 'ops-team,release-manager')
+      }
+    }
+
+    stage('Backup State') {
+      steps {
+        sh """ansible-playbook playbooks/backup.yml \
+          -i inventory/${TARGET_ENV}/ \
+          -e "backup_tag=pre-${BUILD_NUMBER}" \
+          --vault-password-file <(echo $VAULT_PASS)"""
+      }
+    }
+
+    stage('Canary Deploy') {
+      when { expression { TARGET_ENV == 'prod' } }
+      steps {
+        script { env.FAILED_STAGE = 'Canary' }
+        sh 'ansible-playbook site.yml -i inventory/prod/ --limit canary'
+        sh 'sleep 60 && python3 scripts/health_check.py --group canary'
+      }
+    }
+
+    stage('Rolling Deploy') {
+      steps {
+        script { env.FAILED_STAGE = 'Deploy' }
+        sh """ansible-playbook site.yml \
+          -i inventory/${TARGET_ENV}/ \
+          -e "build=${BUILD_NUMBER}" \
+          --vault-password-file <(echo $VAULT_PASS) \
+          ${params.LIMIT ? "--limit ${params.LIMIT}" : ''} \
+          --forks 5"""
+      }
+    }
+
+    stage('Smoke Tests') {
+      steps {
+        script { env.FAILED_STAGE = 'Smoke Tests' }
+        sh 'ansible-playbook playbooks/smoke_tests.yml -i inventory/${TARGET_ENV}/'
+      }
+    }
+  }
+
+  post {
+    success {
+      sh "python3 scripts/notify.py --status success --build ${BUILD_NUMBER}"
+    }
+    failure {
+      sh "python3 scripts/notify.py --status failure --stage ${FAILED_STAGE}"
+      sh """ansible-playbook playbooks/rollback.yml \
+        -i inventory/${TARGET_ENV}/ \
+        -e "rollback_to=pre-${BUILD_NUMBER}" \
+        --vault-password-file <(echo $VAULT_PASS)"""
+    }
+    always { cleanWs() }
+  }
+}
