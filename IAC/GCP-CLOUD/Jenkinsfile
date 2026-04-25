@@ -41,5 +41,16 @@ pipeline {
                 sh "terraform plan -var-file=${params.ENVIRONMENT}.tfvars -out=tfplan_${params.ENVIRONMENT} -detailed-exitcode || [ \$? -eq 2 ]"
             }
         }
+        stage ('artifacts') {
+            steps {
+                archiveArtifacts artifacts: 'tfplan_${params.ENVIRONMENT}',fingerprint : true
+            }
+        }
+    }
+    post {
+        always{
+            echo "terraform stages complete"
+        }
+
     }
 }
