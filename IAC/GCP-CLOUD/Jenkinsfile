@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        any ß
+        any 
         // Ensure your 'docker' labeled agent has the terraform binary installed
         //label "docker"
         //docker {
