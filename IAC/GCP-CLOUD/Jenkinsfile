@@ -53,6 +53,7 @@ pipeline {
         }
         stage ('artifacts') {
             steps {
+                dir('IAC/GCP-CLOUD')
                 archiveArtifacts artifacts: 'tfplan_${params.ENVIRONMENT}',fingerprint : true
             }
         }
