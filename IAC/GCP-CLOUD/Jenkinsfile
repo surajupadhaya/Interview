@@ -40,7 +40,7 @@ pipeline {
                 // 1. Use double quotes " for string interpolation in Jenkins
                 // 2. Fixed typo from tfpan to tfplan
                 // 3. Added || [ $? -eq 2 ] so the pipeline doesn't 'fail' just because there are changes
-                sh "terraform plan -var-file=${params.ENVIRONMENT}.tfvars -out=tfplan_${params.ENVIRONMENT} -detailed-exitcode || [ \$? -eq 2 ]"
+                sh "terraform plan -var-file=IAC/GCP-CLOUD/${params.ENVIRONMENT}.tfvars -out=IAC/GCP-CLOUD/tfplan_${params.ENVIRONMENT} -detailed-exitcode || [ \$? -eq 2 ]"
             }
         }
         stage ('artifacts') {
