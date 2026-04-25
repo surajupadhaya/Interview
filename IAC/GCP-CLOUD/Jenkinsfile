@@ -49,7 +49,7 @@ pipeline {
     }
     post {
         always{
-            echo "terraform stages complete"
+            echo "terraform stages complete sucess "
         }
 
     }
