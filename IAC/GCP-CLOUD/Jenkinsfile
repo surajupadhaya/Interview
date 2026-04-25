@@ -17,21 +17,27 @@ pipeline {
         
         stage('Initialise the provider') {
             steps {
-                sh 'IAC/GCP-CLOUD/terraform init'
+                dir('IAC/GCP-CLOUD'){
+                    sh 'terraform init'
+                }
             }
         }
 
         stage('check the format') {
             steps {
                 // Using -check ensures CI fails if code isn't properly formatted
-                sh 'IAC/GCP-CLOUD/terraform fmt'
+                dir('IAC/GCP-CLOUD'){
+                    sh 'terraform fmt'
+                }
             }
         }
 
         stage('validate the syntax') {
             steps {
                 // In Jenkins, all steps inside a stage MUST be inside a 'steps' block
-                sh 'IAC/GCP-CLOUD/terraform validate'
+                dir('IAC/GCP-CLOUD'){               
+                    sh 'terraform validate'
+                }
             }
         }
 
@@ -40,7 +46,9 @@ pipeline {
                 // 1. Use double quotes " for string interpolation in Jenkins
                 // 2. Fixed typo from tfpan to tfplan
                 // 3. Added || [ $? -eq 2 ] so the pipeline doesn't 'fail' just because there are changes
-                sh "IAC/GCP-CLOUD/terraform plan -var-file=IAC/GCP-CLOUD/${params.ENVIRONMENT}.tfvars -out=IAC/GCP-CLOUD/tfplan_${params.ENVIRONMENT} -detailed-exitcode || [ \$? -eq 2 ]"
+                dir('IAC/GCP-CLOUD'){
+                    sh "terraform plan -var-file=${params.ENVIRONMENT}.tfvars -out=tfplan_${params.ENVIRONMENT} -detailed-exitcode || [ \$? -eq 2 ]"
+                }
             }
         }
         stage ('artifacts') {
