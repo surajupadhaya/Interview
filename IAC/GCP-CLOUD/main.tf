@@ -21,9 +21,9 @@ resource "google_compute_subnetwork" "public_network" {
 
 }
 resource "google_compute_instance" "testVM" {
-  name         = "testvm"
-  machine_type = var.machine_type
-  zone         = var.location
+  name           = "testvm"
+  machine_type   = var.machine_type
+  zone           = var.location
   desired_status = "TERMINATED"
   boot_disk {
     initialize_params {
@@ -34,7 +34,7 @@ resource "google_compute_instance" "testVM" {
     }
   }
   network_interface {
-    network = google_compute_network.TestVPC
+    network    = google_compute_network.TestVPC
     subnetwork = google_compute_subnetwork.public_network.id
     network_ip = "192.168.0.10"
 

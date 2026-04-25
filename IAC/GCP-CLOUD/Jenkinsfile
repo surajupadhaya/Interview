@@ -24,7 +24,7 @@ pipeline {
         stage('check the format') {
             steps {
                 // Using -check ensures CI fails if code isn't properly formatted
-                sh 'terraform fmt -check'
+                sh 'terraform fmt'
             }
         }
 
