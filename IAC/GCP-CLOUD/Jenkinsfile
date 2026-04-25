@@ -1,12 +1,13 @@
 pipeline {
     agent {
+        any ß
         // Ensure your 'docker' labeled agent has the terraform binary installed
         //label "docker"
-        docker {
-            image 'hashicorp/terraform:latest'
+        //docker {
+        //    image 'hashicorp/terraform:latest'
             // This is the "magic" that lets it use the VM's identity
-            args '--network host'
-        }
+        //    args '--network host'
+       // }
     }
     parameters {
         // Fixed spelling of ENVIRONMENT for consistency
