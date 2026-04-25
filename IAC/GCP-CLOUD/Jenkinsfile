@@ -1,0 +1,45 @@
+pipeline {
+    agent {
+        // Ensure your 'docker' labeled agent has the terraform binary installed
+        //label "docker"
+        docker {
+            image 'hashicorp/terraform:latest'
+            // This is the "magic" that lets it use the VM's identity
+            args '--network host'
+        }
+    }
+    parameters {
+        // Fixed spelling of ENVIRONMENT for consistency
+        choice(name: 'ENVIRONMENT', choices: ['development', 'Prod', 'SIT'], description: 'Select the env')
+    }
+    stages {
+        stage('Initialise the provider') {
+            steps {
+                sh 'terraform init'
+            }
+        }
+
+        stage('check the format') {
+            steps {
+                // Using -check ensures CI fails if code isn't properly formatted
+                sh 'terraform fmt -check'
+            }
+        }
+
+        stage('validate the syntax') {
+            steps {
+                // In Jenkins, all steps inside a stage MUST be inside a 'steps' block
+                sh 'terraform validate'
+            }
+        }
+
+        stage('Plan the Resource') {
+            steps {
+                // 1. Use double quotes " for string interpolation in Jenkins
+                // 2. Fixed typo from tfpan to tfplan
+                // 3. Added || [ $? -eq 2 ] so the pipeline doesn't 'fail' just because there are changes
+                sh "terraform plan -var-file=${params.ENVIRONMENT}.tfvars -out=tfplan_${params.ENVIRONMENT} -detailed-exitcode || [ \$? -eq 2 ]"
+            }
+        }
+    }
+}
