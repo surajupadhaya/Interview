@@ -34,7 +34,7 @@ resource "google_compute_instance" "testVM" {
     }
   }
   network_interface {
-    network    = google_compute_network.TestVPC
+    network    = google_compute_network.TestVPC.id
     subnetwork = google_compute_subnetwork.public_network.id
     network_ip = "192.168.0.10"
 
